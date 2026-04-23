@@ -8,6 +8,7 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+
 // GET /api/validate?email=&account=
 export const validateUser = (email, account) =>
   api.get('/api/validate', { params: { email, account } });
