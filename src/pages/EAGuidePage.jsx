@@ -106,7 +106,7 @@ export default function EAGuidePage() {
     // The .ex5 file should be served from your backend or a static URL
     // For now we trigger download of a placeholder
     const link = document.createElement('a');
-    link.href = `${BACKEND_URL}/download/RiskGuard.ex5`;
+    link.href = `${BACKEND_URL}/api/download/RiskGuard.ex5`;
     link.download = 'RiskGuard.ex5';
     link.click();
     setTimeout(() => {
@@ -251,11 +251,11 @@ export default function EAGuidePage() {
               EA Input Parameters
             </div>
             {[
-              { label: 'USER_EMAIL',           value: user?.email    || 'your@email.com', desc: 'Your RiskGuard login email' },
-              { label: 'BACKEND_URL',          value: BACKEND_URL,                        desc: 'The server address (pre-filled)' },
-              { label: 'MAX_CONSECUTIVE_LOSSES', value: '2',                               desc: 'Or leave — backend overrides this' },
-              { label: 'MAX_DAILY_LOSS_PERCENT', value: '3.0',                             desc: 'Or leave — backend overrides this' },
-              { label: 'MAX_TRADES_PER_DAY',   value: '5',                                desc: 'Or leave — backend overrides this' },
+              { label: 'USER_EMAIL', value: user?.email || 'your@email.com', desc: 'Your RiskGuard login email' },
+              { label: 'BACKEND_URL', value: BACKEND_URL, desc: 'The server address (pre-filled)' },
+              { label: 'MAX_CONSECUTIVE_LOSSES', value: '2', desc: 'Or leave — backend overrides this' },
+              { label: 'MAX_DAILY_LOSS_PERCENT', value: '3.0', desc: 'Or leave — backend overrides this' },
+              { label: 'MAX_TRADES_PER_DAY', value: '5', desc: 'Or leave — backend overrides this' },
             ].map(row => (
               <div key={row.label} style={{
                 display: 'grid', gridTemplateColumns: '180px 1fr',
