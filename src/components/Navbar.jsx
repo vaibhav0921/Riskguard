@@ -28,7 +28,7 @@ export default function Navbar({ activeTab, setActiveTab }) {
     { id: 'rules', label: '⚙ My Rules' },
     { id: 'guide', label: '📡 EA Setup' },
     { id: 'contact', label: '📬 Contact' },
-    { id: 'terms', label: '📬 Terms' },  // ADD THIS
+    { id: 'terms', label: '📄 Legal' },  // ADD THIS
   ];
 
   const handleLogout = (e) => {
