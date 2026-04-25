@@ -11,7 +11,7 @@ import SuccessPage   from './pages/SuccessPage';
 import DashboardPage from './pages/DashboardPage';
 import SettingsPage  from './pages/SettingsPage';
 import EAGuidePage   from './pages/EAGuidePage';
-
+import TermsPage     from './pages/TermsPage';
 import ContactPage from './pages/ContactPage';
 
 function AppRouter() {
@@ -81,6 +81,7 @@ function AppRouter() {
             {activeTab === 'rules' && <SettingsPage />}
             {activeTab === 'guide' && <EAGuidePage />}
             {activeTab === 'contact' && <ContactPage />}
+            {activeTab === 'terms' && <TermsPage />}
           </>
         );
 

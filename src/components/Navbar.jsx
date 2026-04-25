@@ -24,11 +24,12 @@ export default function Navbar({ activeTab, setActiveTab }) {
         daysLeft <= 14 ? 'var(--gold)' : 'var(--lime)';
 
   const tabs = [
-  { id: 'home',    label: '🏠 Home'      },
-  { id: 'rules',   label: '⚙ My Rules'   },
-  { id: 'guide',   label: '📡 EA Setup'  },
-  { id: 'contact', label: '📬 Contact'   },  // ADD THIS
-];
+    { id: 'home', label: '🏠 Home' },
+    { id: 'rules', label: '⚙ My Rules' },
+    { id: 'guide', label: '📡 EA Setup' },
+    { id: 'contact', label: '📬 Contact' },
+    { id: 'terms', label: '📬 Terms' },  // ADD THIS
+  ];
 
   const handleLogout = (e) => {
     e.preventDefault();
@@ -80,7 +81,7 @@ export default function Navbar({ activeTab, setActiveTab }) {
           )}
           {subscription && (
             <span className={`badge ${subscription.planId === 'advanced' ? 'badge-gold' :
-                subscription.planId === 'pro' ? 'badge-lime' : 'badge-sky'
+              subscription.planId === 'pro' ? 'badge-lime' : 'badge-sky'
               }`}>
               {subscription.planName?.toUpperCase() || 'ACTIVE'}
             </span>
