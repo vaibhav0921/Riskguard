@@ -6,7 +6,7 @@ const AppContext = createContext(null);
 
 export const PLANS = {
   basic: {
-    id: 'basic', name: 'Basic', price: 0, currency: '₹',
+    id: 'basic', name: 'Basic', price: 799, currency: '₹',
     months: 1, duration: '1 month access', icon: '🔰', badge: 'BASIC',
     color: 'var(--sky)',
     features: ['Consecutive loss rule', 'Daily loss % limit', 'Max trades per day', 'Auto daily reset'],

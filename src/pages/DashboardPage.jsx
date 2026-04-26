@@ -247,8 +247,8 @@ function TradingBlocked({ reason, eaData, rules, user, subscription, lastSync })
   );
 }
 
-export default function DashboardPage({ onGoGuide }) {
-  usePolling();
+export default function DashboardPage({ onGoGuide, onSubscriptionExpired }) {
+  usePolling(onSubscriptionExpired);
   const eaData = useSelector(s => s.status.eaData);
   const rules = useSelector(s => s.status.rules);
   const eaConnected = useSelector(s => s.status.eaConnected);

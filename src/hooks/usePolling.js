@@ -8,13 +8,13 @@ import {
   setLoading,
   setError,
 } from '../store/statusSlice';
-import { setSubscription } from '../store/authSlice';
+import { setSubscription, logoutAction } from '../store/authSlice'; // ADDED: logoutAction
 
 const POLL_INTERVAL = 15000;
 
-export function usePolling() {
+export function usePolling(onSubscriptionExpired) { // ADDED: onSubscriptionExpired param
   const dispatch = useDispatch();
-  const user     = useSelector(s => s.auth.user);
+  const user = useSelector(s => s.auth.user);
   const timerRef = useRef(null);
   const isFirstRun = useRef(true);
 
@@ -23,14 +23,14 @@ export function usePolling() {
 
     const poll = async () => {
       try {
-        const res  = await fetchStatus(user.email, user.account);
+        const res = await fetchStatus(user.email, user.account);
         const data = res.data;
 
         console.log('[Poll] Raw status:', data);
 
         const connected =
-          data?.eaconnected   === true ||
-          data?.eaConnected   === true ||
+          data?.eaconnected === true ||
+          data?.eaConnected === true ||
           data?.isEAConnected === true;
 
         console.log('[Poll] EA connected:', connected);
@@ -49,16 +49,23 @@ export function usePolling() {
         }
 
         try {
-          const vRes  = await validateUser(user.email, user.account);
+          const vRes = await validateUser(user.email, user.account);
           const vData = vRes.data;
           if (vData?.active && vData?.expiryDate) {
             const planMap = { BASIC: 'basic', PRO: 'pro', ADVANCED: 'advanced' };
             dispatch(setSubscription({
-              planId:      planMap[vData.plan] || 'pro',
-              planName:    vData.plan,
-              expiryDate:  vData.expiryDate,
+              planId: planMap[vData.plan] || 'pro',
+              planName: vData.plan,
+              expiryDate: vData.expiryDate,
               activatedAt: new Date().toISOString(),
             }));
+          } else if (vData?.active === false) {
+            // ADDED: subscription expired/inactive — kick user out of dashboard
+            console.warn('[Poll] Subscription inactive — redirecting to plans.');
+            localStorage.removeItem('rg_session');
+            dispatch(setSubscription(null));
+            dispatch(logoutAction());
+            if (onSubscriptionExpired) onSubscriptionExpired();
           }
         } catch (e) {
           console.warn('[Poll] Validate failed (non-critical):', e.message);
@@ -81,5 +88,5 @@ export function usePolling() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [user?.email, user?.account, dispatch]);
+  }, [user?.email, user?.account, dispatch, onSubscriptionExpired]);
 }

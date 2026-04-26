@@ -77,7 +77,7 @@ function AppRouter() {
         return (
           <>
             <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
-            {activeTab === 'home' && <DashboardPage onGoGuide={() => setActiveTab('guide')} />}
+            {activeTab === 'home' && <DashboardPage onGoGuide={() => setActiveTab('guide')} onSubscriptionExpired={() => { localStorage.removeItem('rg_session'); goTo('plans'); }} />}
             {activeTab === 'rules' && <SettingsPage />}
             {activeTab === 'guide' && <EAGuidePage />}
             {activeTab === 'contact' && <ContactPage />}
