@@ -13,6 +13,7 @@ import SettingsPage from './pages/SettingsPage';
 import EAGuidePage from './pages/EAGuidePage';
 import ContactPage from './pages/ContactPage';
 import TermsPage from './pages/TermsPage';
+import LandingPage from './pages/LandingPage';
 
 function AppRouter() {
   // Auth now comes from Redux store
@@ -28,7 +29,8 @@ function AppRouter() {
   // It is cleared when user is on plans/payment flow so refresh there goes to login.
   const wasOnDashboard = localStorage.getItem('rg_session') === 'active';
 
-  const [route, setRoute] = useState(wasOnDashboard ? 'app' : 'login');
+  // const [route, setRoute] = useState(wasOnDashboard ? 'app' : 'login');
+  const [route, setRoute] = useState('landing');
   const [activeTab, setActiveTab] = useState('home');
 
   const goTo = (r) => setRoute(r);
@@ -47,6 +49,8 @@ function AppRouter() {
   const renderPage = () => {
     switch (route) {
 
+      case 'landing':
+        return <LandingPage onGetStarted={() => setRoute('login')} />;
       case 'login':
         return (
           <LoginPage
@@ -54,6 +58,7 @@ function AppRouter() {
             onNeedPlans={() => goTo('plans')}
           />
         );
+
 
       case 'plans':
         return <PlansPage onContinue={() => goTo('payment')} />;
