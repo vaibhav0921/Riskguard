@@ -30,7 +30,7 @@ function AppRouter() {
   const wasOnDashboard = localStorage.getItem('rg_session') === 'active';
 
   // const [route, setRoute] = useState(wasOnDashboard ? 'app' : 'login');
-  const [route, setRoute] = useState('landing');
+  const [route, setRoute] = useState(user && subscription && wasOnDashboard ? 'app' : 'landing');
   const [activeTab, setActiveTab] = useState('home');
 
   const goTo = (r) => setRoute(r);
