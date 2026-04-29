@@ -7,7 +7,7 @@ import Spinner from '../components/Spinner';
 
 // ── RAZORPAY CONFIG ──────────────────────────────────────────────
 // Replace with your actual Key ID. Key Secret NEVER goes in frontend.
-const RAZORPAY_KEY_ID = 'rzp_live_ShDmAXZ3W5QwZj';
+const RAZORPAY_KEY_ID = 'rzp_live_SiQSexGhGz9XjH';
 // ────────────────────────────────────────────────────────────────
 
 const LockIcon = () => (
