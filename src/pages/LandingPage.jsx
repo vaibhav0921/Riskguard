@@ -52,63 +52,127 @@ function useInView(threshold = 0.15) {
     return [ref, inView];
 }
 
+// ── ADDED: mobile detection hook ────────────────────────────────
+function useMobile() {
+    const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth < 768 : false);
+    useEffect(() => {
+        const fn = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener("resize", fn);
+        return () => window.removeEventListener("resize", fn);
+    }, []);
+    return isMobile;
+}
+
 function Navbar({ onCTA }) {
     const [scrolled, setScrolled] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);  // ADDED
+    const isMobile = useMobile();                       // ADDED
     useEffect(() => {
         const fn = () => setScrolled(window.scrollY > 20);
         window.addEventListener("scroll", fn);
         return () => window.removeEventListener("scroll", fn);
     }, []);
+
+    const scrollTo = (id) => {                          // ADDED
+        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+        setMenuOpen(false);
+    };
+
     return (
-        <nav style={{
-            position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-            padding: "0 48px", height: "64px",
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-            background: scrolled ? "rgba(4,8,20,0.95)" : "transparent",
-            backdropFilter: scrolled ? "blur(12px)" : "none",
-            borderBottom: scrolled ? "1px solid rgba(255,255,255,0.06)" : "none",
-            transition: "all 0.3s ease",
-        }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <div style={{ width: "28px", height: "28px", background: "linear-gradient(135deg, #00D4FF, #0099CC)", borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1L13 4V10L7 13L1 10V4L7 1Z" stroke="white" strokeWidth="1.5" fill="none" /><circle cx="7" cy="7" r="2" fill="white" /></svg>
+        <>
+            <nav style={{
+                position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+                padding: isMobile ? "0 20px" : "0 48px",   // CHANGED
+                height: "60px",                              // CHANGED from 64px
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                background: scrolled || menuOpen ? "rgba(4,8,20,0.97)" : "transparent",
+                backdropFilter: scrolled || menuOpen ? "blur(12px)" : "none",
+                borderBottom: scrolled ? "1px solid rgba(255,255,255,0.06)" : "none",
+                transition: "all 0.3s ease",
+            }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <div style={{ width: "28px", height: "28px", background: "linear-gradient(135deg, #00D4FF, #0099CC)", borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1L13 4V10L7 13L1 10V4L7 1Z" stroke="white" strokeWidth="1.5" fill="none" /><circle cx="7" cy="7" r="2" fill="white" /></svg>
+                    </div>
+                    <span style={{ fontSize: "16px", fontWeight: "700", color: "#fff", fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: "-0.3px" }}>RiskGuard</span>
                 </div>
-                <span style={{ fontSize: "16px", fontWeight: "700", color: "#fff", fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: "-0.3px" }}>RiskGuard</span>
-            </div>
-            <div style={{ display: "flex", gap: "28px" }}>
-                {NAV_LINKS.map(l => (
-                    <span key={l.label}
-                        onClick={() => document.getElementById(l.id)?.scrollIntoView({ behavior: "smooth" })}
-                        style={{ fontSize: "13px", color: "rgba(255,255,255,0.5)", cursor: "pointer", transition: "color 0.2s", letterSpacing: "0.2px" }}
-                        onMouseEnter={e => e.target.style.color = "#fff"}
-                        onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.5)"}
-                    >{l.label}</span>
-                ))}
-            </div>
-            <button onClick={onCTA} style={{
-                background: "linear-gradient(135deg, #00D4FF, #0077AA)",
-                color: "white", border: "none", padding: "9px 22px",
-                borderRadius: "8px", fontSize: "13px", fontWeight: "600",
-                cursor: "pointer", letterSpacing: "0.2px",
-            }}>Get Started →</button>
-        </nav>
+
+                {/* Desktop nav links — hidden on mobile */}
+                {!isMobile && (
+                    <div style={{ display: "flex", gap: "28px" }}>
+                        {NAV_LINKS.map(l => (
+                            <span key={l.label}
+                                onClick={() => scrollTo(l.id)}
+                                style={{ fontSize: "13px", color: "rgba(255,255,255,0.5)", cursor: "pointer", transition: "color 0.2s", letterSpacing: "0.2px" }}
+                                onMouseEnter={e => e.target.style.color = "#fff"}
+                                onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.5)"}
+                            >{l.label}</span>
+                        ))}
+                    </div>
+                )}
+
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    {!isMobile && (
+                        <button onClick={onCTA} style={{
+                            background: "linear-gradient(135deg, #00D4FF, #0077AA)",
+                            color: "white", border: "none", padding: "9px 22px",
+                            borderRadius: "8px", fontSize: "13px", fontWeight: "600",
+                            cursor: "pointer", letterSpacing: "0.2px",
+                        }}>Get Started →</button>
+                    )}
+                    {/* Hamburger — mobile only */}
+                    {isMobile && (
+                        <button onClick={() => setMenuOpen(!menuOpen)} style={{
+                            background: "transparent", border: "none", cursor: "pointer",
+                            color: "#fff", fontSize: "22px", padding: "4px", lineHeight: 1,
+                        }}>
+                            {menuOpen ? "✕" : "☰"}
+                        </button>
+                    )}
+                </div>
+            </nav>
+
+            {/* Mobile dropdown menu */}
+            {isMobile && menuOpen && (
+                <div style={{
+                    position: "fixed", top: "60px", left: 0, right: 0, zIndex: 99,
+                    background: "rgba(4,8,20,0.98)", borderBottom: "1px solid rgba(255,255,255,0.06)",
+                    padding: "12px 20px 24px",
+                }}>
+                    {NAV_LINKS.map(l => (
+                        <div key={l.label} onClick={() => scrollTo(l.id)}
+                            style={{ padding: "14px 0", fontSize: "15px", color: "rgba(255,255,255,0.7)", cursor: "pointer", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                            {l.label}
+                        </div>
+                    ))}
+                    <button onClick={() => { onCTA(); setMenuOpen(false); }} style={{
+                        width: "100%", marginTop: "20px",
+                        background: "linear-gradient(135deg, #00D4FF, #0077AA)",
+                        color: "white", border: "none", padding: "14px",
+                        borderRadius: "10px", fontSize: "15px", fontWeight: "600", cursor: "pointer",
+                    }}>Get Started →</button>
+                </div>
+            )}
+        </>
     );
 }
 
 function Hero({ onCTA }) {
     const [mounted, setMounted] = useState(false);
+    const isMobile = useMobile();  // ADDED
     useEffect(() => { setTimeout(() => setMounted(true), 100); }, []);
     return (
         <section style={{
             minHeight: "100vh",
             background: "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0,180,255,0.12) 0%, transparent 60%), #040814",
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-            padding: "100px 48px 60px", position: "relative", overflow: "hidden",
+            padding: isMobile ? "90px 20px 60px" : "100px 48px 60px",  // CHANGED
+            position: "relative", overflow: "hidden",
         }}>
             <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(0,180,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,180,255,0.04) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
             <div style={{ position: "absolute", top: "20%", left: "10%", width: "300px", height: "300px", background: "radial-gradient(circle, rgba(0,180,255,0.06) 0%, transparent 70%)", borderRadius: "50%" }} />
             <div style={{ position: "absolute", bottom: "20%", right: "10%", width: "250px", height: "250px", background: "radial-gradient(circle, rgba(0,120,200,0.06) 0%, transparent 70%)", borderRadius: "50%" }} />
-            <div style={{ position: "relative", textAlign: "center", maxWidth: "820px" }}>
+            <div style={{ position: "relative", textAlign: "center", maxWidth: "820px", width: "100%" }}>  {/* ADDED width:100% */}
 
                 {/* LIVE badge */}
                 <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(0,180,255,0.08)", border: "1px solid rgba(0,180,255,0.2)", borderRadius: "20px", padding: "6px 16px", marginBottom: "28px", opacity: mounted ? 1 : 0, transform: mounted ? "translateY(0)" : "translateY(16px)", transition: "all 0.6s ease" }}>
@@ -118,7 +182,7 @@ function Hero({ onCTA }) {
 
                 {/* Bold statement lines */}
                 <div style={{
-                    display: "flex", flexDirection: "column", gap: "12px", alignItems: "center", marginBottom: "32px",
+                    display: "flex", flexDirection: "column", gap: "10px", alignItems: "center", marginBottom: "28px",
                     opacity: mounted ? 1 : 0, transform: mounted ? "translateY(0)" : "translateY(20px)",
                     transition: "all 0.65s ease 0.05s",
                 }}>
@@ -127,40 +191,63 @@ function Hero({ onCTA }) {
                         { text: "Overtrading Is Killing Your Account.", icon: "📉" },
                     ].map((line) => (
                         <div key={line.text} style={{
-                            display: "inline-flex", alignItems: "center", gap: "12px",
+                            display: "inline-flex", alignItems: "center", gap: "10px",
                             background: "rgba(255,71,87,0.06)",
                             border: "1px solid rgba(255,71,87,0.2)",
-                            borderRadius: "12px", padding: "12px 24px",
+                            borderRadius: "12px", padding: isMobile ? "10px 16px" : "12px 24px",  // CHANGED
+                            width: isMobile ? "100%" : "auto",                                      // ADDED
                         }}>
-                            <span style={{ fontSize: "20px" }}>{line.icon}</span>
+                            <span style={{ fontSize: isMobile ? "16px" : "20px" }}>{line.icon}</span>  {/* CHANGED */}
                             <span style={{
-                                fontSize: "18px", fontWeight: "700",
+                                fontSize: isMobile ? "13px" : "18px",  // CHANGED
+                                fontWeight: "700",
                                 color: "rgba(255,255,255,0.75)",
                                 fontFamily: "'Plus Jakarta Sans', sans-serif",
                                 letterSpacing: "-0.3px",
+                                textAlign: "left",
                             }}>{line.text}</span>
                         </div>
                     ))}
                 </div>
 
                 {/* Main headline */}
-                <h1 style={{ fontSize: "52px", fontWeight: "800", lineHeight: "1.25", color: "#ffffff", fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: "-2px", marginBottom: "24px", opacity: mounted ? 1 : 0, transform: mounted ? "translateY(0)" : "translateY(24px)", transition: "all 0.7s ease 0.1s" }}>
+                <h1 style={{
+                    fontSize: isMobile ? "34px" : "52px",  // CHANGED
+                    fontWeight: "800", lineHeight: "1.2",   // CHANGED lineHeight
+                    color: "#ffffff", fontFamily: "'Plus Jakarta Sans', sans-serif",
+                    letterSpacing: isMobile ? "-0.5px" : "-2px",  // CHANGED
+                    marginBottom: "20px",
+                    opacity: mounted ? 1 : 0, transform: mounted ? "translateY(0)" : "translateY(24px)", transition: "all 0.7s ease 0.1s"
+                }}>
                     Your broker won't save you.<br />
                     <span style={{ background: "linear-gradient(135deg, #00D4FF, #0099CC)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>We will.</span>
                 </h1>
 
-                <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.5)", lineHeight: "1.8", marginBottom: "40px", maxWidth: "520px", margin: "0 auto 40px", opacity: mounted ? 1 : 0, transform: mounted ? "translateY(0)" : "translateY(24px)", transition: "all 0.7s ease 0.2s" }}>
+                <p style={{
+                    fontSize: isMobile ? "14px" : "16px",  // CHANGED
+                    color: "rgba(255,255,255,0.5)", lineHeight: "1.8",
+                    marginBottom: "32px", maxWidth: "520px", margin: "0 auto 32px",
+                    opacity: mounted ? 1 : 0, transform: mounted ? "translateY(0)" : "translateY(24px)", transition: "all 0.7s ease 0.2s"
+                }}>
                     RiskGuard enforces your trading rules automatically on MetaTrader 5. No emotions. No excuses. Just discipline.
                 </p>
-                <div style={{ display: "flex", gap: "12px", justifyContent: "center", marginBottom: "64px", opacity: mounted ? 1 : 0, transform: mounted ? "translateY(0)" : "translateY(24px)", transition: "all 0.7s ease 0.3s" }}>
+
+                {/* CTA buttons — stack on mobile */}
+                <div style={{
+                    display: "flex",
+                    flexDirection: isMobile ? "column" : "row",  // CHANGED
+                    gap: "12px", justifyContent: "center", marginBottom: "52px",
+                    opacity: mounted ? 1 : 0, transform: mounted ? "translateY(0)" : "translateY(24px)", transition: "all 0.7s ease 0.3s"
+                }}>
                     <button onClick={onCTA} style={{ background: "linear-gradient(135deg, #00D4FF, #0077AA)", color: "white", border: "none", padding: "15px 36px", borderRadius: "10px", fontSize: "15px", fontWeight: "600", cursor: "pointer" }}>Start protecting my account →</button>
                     <button onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })} style={{ background: "transparent", color: "rgba(255,255,255,0.7)", border: "1px solid rgba(255,255,255,0.12)", padding: "15px 28px", borderRadius: "10px", fontSize: "15px", cursor: "pointer" }}>See how it works</button>
                 </div>
-                <div style={{ display: "flex", gap: "48px", justifyContent: "center", opacity: mounted ? 1 : 0, transition: "all 0.7s ease 0.4s" }}>
+
+                <div style={{ display: "flex", gap: isMobile ? "28px" : "48px", justifyContent: "center", opacity: mounted ? 1 : 0, transition: "all 0.7s ease 0.4s" }}>
                     {[["500+", "Active traders"], ["₹0", "Lost to EA bugs"], ["10s", "Rule sync speed"]].map(([n, l]) => (
                         <div key={l} style={{ textAlign: "center" }}>
-                            <div style={{ fontSize: "22px", fontWeight: "700", color: "#fff", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{n}</div>
-                            <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.35)", marginTop: "4px" }}>{l}</div>
+                            <div style={{ fontSize: isMobile ? "18px" : "22px", fontWeight: "700", color: "#fff", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{n}</div>
+                            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.35)", marginTop: "4px" }}>{l}</div>
                         </div>
                     ))}
                 </div>
@@ -172,18 +259,20 @@ function Hero({ onCTA }) {
 
 function Problems() {
     const [ref, inView] = useInView();
+    const isMobile = useMobile();  // ADDED
     return (
-        <section ref={ref} style={{ padding: "80px 48px", background: "#060c1c" }}>
+        <section ref={ref} style={{ padding: isMobile ? "60px 20px" : "80px 48px", background: "#060c1c" }}>
             <div style={{ maxWidth: "960px", margin: "0 auto" }}>
-                <div style={{ marginBottom: "56px" }}>
+                <div style={{ marginBottom: "40px" }}>
                     <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "3px", color: "#00D4FF", marginBottom: "12px", textTransform: "uppercase" }}>The problem</div>
-                    <h2 style={{ fontSize: "34px", fontWeight: "800", color: "#fff", fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: "-0.5px", lineHeight: "1.3" }}>
+                    <h2 style={{ fontSize: isMobile ? "26px" : "34px", fontWeight: "800", color: "#fff", fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: "-0.5px", lineHeight: "1.3" }}>
                         You already know the rules.<br /><span style={{ color: "rgba(255,255,255,0.3)" }}>You just can't follow them.</span>
                     </h2>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "20px" }}>
+                {/* CHANGED: 1fr on mobile, 3 cols on desktop */}
+                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3,1fr)", gap: "16px" }}>
                     {PROBLEMS.map((p, i) => (
-                        <div key={p.title} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "16px", padding: "32px 28px", opacity: inView ? 1 : 0, transform: inView ? "translateY(0)" : "translateY(32px)", transition: `all 0.6s ease ${i * 0.1}s` }}>
+                        <div key={p.title} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "16px", padding: "28px 24px", opacity: inView ? 1 : 0, transform: inView ? "translateY(0)" : "translateY(32px)", transition: `all 0.6s ease ${i * 0.1}s` }}>
                             <div style={{ width: "48px", height: "48px", background: p.bg, borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px", marginBottom: "20px" }}>{p.icon}</div>
                             <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#fff", marginBottom: "10px" }}>{p.title}</h3>
                             <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.4)", lineHeight: "1.7" }}>{p.desc}</p>
@@ -197,13 +286,15 @@ function Problems() {
 
 function Features() {
     const [ref, inView] = useInView();
+    const isMobile = useMobile();  // ADDED
     return (
-        <section id="features" ref={ref} style={{ padding: "80px 48px", background: "#040814", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+        <section id="features" ref={ref} style={{ padding: isMobile ? "60px 20px" : "80px 48px", background: "#040814", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
             <div style={{ maxWidth: "960px", margin: "0 auto" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "80px", alignItems: "start" }}>
+                {/* CHANGED: 1fr on mobile, 2 cols on desktop */}
+                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? "40px" : "80px", alignItems: "start" }}>
                     <div>
                         <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "3px", color: "#00D4FF", marginBottom: "12px", textTransform: "uppercase" }}>Features</div>
-                        <h2 style={{ fontSize: "34px", fontWeight: "800", color: "#fff", fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: "-0.5px", lineHeight: "1.3", marginBottom: "20px" }}>Three rules.<br />Total control.</h2>
+                        <h2 style={{ fontSize: isMobile ? "26px" : "34px", fontWeight: "800", color: "#fff", fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: "-0.5px", lineHeight: "1.3", marginBottom: "20px" }}>Three rules.<br />Total control.</h2>
                         <p style={{ fontSize: "15px", color: "rgba(255,255,255,0.4)", lineHeight: "1.8" }}>RiskGuard's EA monitors your MT5 account every 10 seconds, enforcing rules you define from the dashboard. Change limits anytime — the EA syncs within seconds.</p>
                         <div style={{ marginTop: "32px", padding: "20px 24px", background: "rgba(0,212,255,0.05)", border: "1px solid rgba(0,212,255,0.15)", borderRadius: "12px" }}>
                             <div style={{ fontSize: "12px", color: "#00D4FF", fontWeight: "600", marginBottom: "6px", letterSpacing: "0.5px" }}>DAILY AUTO-RESET</div>
@@ -227,19 +318,29 @@ function Features() {
 
 function HowItWorks() {
     const [ref, inView] = useInView();
+    const isMobile = useMobile();  // ADDED
     return (
-        <section id="how-it-works" ref={ref} style={{ padding: "80px 48px", background: "#060c1c" }}>
+        <section id="how-it-works" ref={ref} style={{ padding: isMobile ? "60px 20px" : "80px 48px", background: "#060c1c" }}>
             <div style={{ maxWidth: "960px", margin: "0 auto", textAlign: "center" }}>
                 <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "3px", color: "#00D4FF", marginBottom: "12px", textTransform: "uppercase" }}>How it works</div>
-                <h2 style={{ fontSize: "34px", fontWeight: "800", color: "#fff", fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: "-0.5px", marginBottom: "16px" }}>Up and running in 3 steps</h2>
-                <p style={{ fontSize: "15px", color: "rgba(255,255,255,0.4)", marginBottom: "64px" }}>No coding. Works with any MT5 broker worldwide.</p>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "24px", position: "relative" }}>
-                    <div style={{ position: "absolute", top: "32px", left: "calc(16% + 32px)", right: "calc(16% + 32px)", height: "1px", background: "linear-gradient(90deg, rgba(0,212,255,0.3), rgba(0,212,255,0.1), rgba(0,212,255,0.3))" }} />
+                <h2 style={{ fontSize: isMobile ? "26px" : "34px", fontWeight: "800", color: "#fff", fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: "-0.5px", marginBottom: "16px" }}>Up and running in 3 steps</h2>
+                <p style={{ fontSize: "15px", color: "rgba(255,255,255,0.4)", marginBottom: "48px" }}>No coding. Works with any MT5 broker worldwide.</p>
+                {/* CHANGED: 1fr on mobile, 3 cols on desktop */}
+                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3,1fr)", gap: isMobile ? "24px" : "24px", position: "relative" }}>
+                    {!isMobile && <div style={{ position: "absolute", top: "32px", left: "calc(16% + 32px)", right: "calc(16% + 32px)", height: "1px", background: "linear-gradient(90deg, rgba(0,212,255,0.3), rgba(0,212,255,0.1), rgba(0,212,255,0.3))" }} />}
                     {STEPS.map((s, i) => (
-                        <div key={s.n} style={{ opacity: inView ? 1 : 0, transform: inView ? "translateY(0)" : "translateY(28px)", transition: `all 0.6s ease ${i * 0.15}s` }}>
-                            <div style={{ width: "64px", height: "64px", borderRadius: "50%", background: "linear-gradient(135deg, rgba(0,212,255,0.2), rgba(0,120,200,0.1))", border: "1px solid rgba(0,212,255,0.3)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px", fontSize: "20px", fontWeight: "800", color: "#00D4FF", position: "relative", zIndex: 1 }}>{s.n}</div>
-                            <h3 style={{ fontSize: "15px", fontWeight: "700", color: "#fff", marginBottom: "10px" }}>{s.title}</h3>
-                            <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.4)", lineHeight: "1.7" }}>{s.desc}</p>
+                        <div key={s.n} style={{
+                            opacity: inView ? 1 : 0, transform: inView ? "translateY(0)" : "translateY(28px)", transition: `all 0.6s ease ${i * 0.15}s`,
+                            display: "flex", flexDirection: isMobile ? "row" : "column",  // CHANGED: row on mobile
+                            alignItems: isMobile ? "flex-start" : "center",
+                            gap: isMobile ? "16px" : "0",
+                            textAlign: isMobile ? "left" : "center",
+                        }}>
+                            <div style={{ width: "64px", height: "64px", borderRadius: "50%", background: "linear-gradient(135deg, rgba(0,212,255,0.2), rgba(0,120,200,0.1))", border: "1px solid rgba(0,212,255,0.3)", display: "flex", alignItems: "center", justifyContent: "center", margin: isMobile ? "0" : "0 auto 24px", fontSize: "20px", fontWeight: "800", color: "#00D4FF", position: "relative", zIndex: 1, flexShrink: 0 }}>{s.n}</div>
+                            <div>
+                                <h3 style={{ fontSize: "15px", fontWeight: "700", color: "#fff", marginBottom: "10px" }}>{s.title}</h3>
+                                <p style={{ fontSize: "13px", color: "rgba(255,255,255,0.4)", lineHeight: "1.7" }}>{s.desc}</p>
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -250,13 +351,15 @@ function HowItWorks() {
 
 function Pricing({ onCTA }) {
     const [ref, inView] = useInView();
+    const isMobile = useMobile();  // ADDED
     return (
-        <section id="pricing" ref={ref} style={{ padding: "80px 48px", background: "#040814" }}>
+        <section id="pricing" ref={ref} style={{ padding: isMobile ? "60px 20px" : "80px 48px", background: "#040814" }}>
             <div style={{ maxWidth: "960px", margin: "0 auto", textAlign: "center" }}>
                 <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "3px", color: "#00D4FF", marginBottom: "12px", textTransform: "uppercase" }}>Pricing</div>
-                <h2 style={{ fontSize: "34px", fontWeight: "800", color: "#fff", fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: "-0.5px", marginBottom: "16px" }}>Simple pricing. No surprises.</h2>
+                <h2 style={{ fontSize: isMobile ? "26px" : "34px", fontWeight: "800", color: "#fff", fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: "-0.5px", marginBottom: "16px" }}>Simple pricing. No surprises.</h2>
                 <p style={{ fontSize: "15px", color: "rgba(255,255,255,0.4)", marginBottom: "56px" }}>Cancel anytime. Start protecting your account today.</p>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "20px" }}>
+                {/* CHANGED: 1fr on mobile, 3 cols on desktop */}
+                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3,1fr)", gap: "20px" }}>
                     {PLANS.map((plan, i) => (
                         <div key={plan.name} style={{ background: plan.popular ? "rgba(0,212,255,0.04)" : "rgba(255,255,255,0.02)", border: plan.popular ? "1px solid rgba(0,212,255,0.25)" : "1px solid rgba(255,255,255,0.06)", borderRadius: "20px", padding: "36px 28px", position: "relative", opacity: inView ? 1 : 0, transform: inView ? "translateY(0)" : "translateY(28px)", transition: `all 0.6s ease ${i * 0.1}s` }}>
                             {plan.popular && <div style={{ position: "absolute", top: "-12px", left: "50%", transform: "translateX(-50%)", background: "linear-gradient(135deg, #00D4FF, #0077AA)", color: "white", fontSize: "11px", fontWeight: "700", padding: "4px 16px", borderRadius: "20px", whiteSpace: "nowrap" }}>MOST POPULAR</div>}
@@ -283,13 +386,15 @@ function Pricing({ onCTA }) {
 
 function AboutUs() {
     const [ref, inView] = useInView();
+    const isMobile = useMobile();  // ADDED
     return (
-        <section id="about" ref={ref} style={{ padding: "80px 48px", background: "#060c1c" }}>
+        <section id="about" ref={ref} style={{ padding: isMobile ? "60px 20px" : "80px 48px", background: "#060c1c" }}>
             <div style={{ maxWidth: "960px", margin: "0 auto" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "80px", alignItems: "center" }}>
+                {/* CHANGED: 1fr on mobile, 2 cols on desktop */}
+                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? "40px" : "80px", alignItems: "center" }}>
                     <div style={{ opacity: inView ? 1 : 0, transform: inView ? "translateX(0)" : "translateX(-32px)", transition: "all 0.7s ease" }}>
                         <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "3px", color: "#00D4FF", marginBottom: "12px", textTransform: "uppercase" }}>About us</div>
-                        <h2 style={{ fontSize: "34px", fontWeight: "800", color: "#fff", fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: "-0.5px", lineHeight: "1.3", marginBottom: "20px" }}>
+                        <h2 style={{ fontSize: isMobile ? "26px" : "34px", fontWeight: "800", color: "#fff", fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: "-0.5px", lineHeight: "1.3", marginBottom: "20px" }}>
                             Built by traders,<br /><span style={{ color: "rgba(255,255,255,0.35)" }}>for traders.</span>
                         </h2>
                         <p style={{ fontSize: "15px", color: "rgba(255,255,255,0.45)", lineHeight: "1.8", marginBottom: "20px" }}>
@@ -306,7 +411,7 @@ function AboutUs() {
                             { icon: "🌍", title: "Our reach", desc: "Serving traders across India and beyond, working with all major MT5 brokers worldwide." },
                         ].map((item) => (
                             <div key={item.title} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "14px", padding: "22px 24px", display: "flex", gap: "16px", alignItems: "flex-start" }}>
-                                <div style={{ fontSize: "22px", marginTop: "2px" }}>{item.icon}</div>
+                                <div style={{ fontSize: "22px", marginTop: "2px", flexShrink: 0 }}>{item.icon}</div>
                                 <div>
                                     <div style={{ fontSize: "14px", fontWeight: "700", color: "#fff", marginBottom: "6px" }}>{item.title}</div>
                                     <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.4)", lineHeight: "1.6" }}>{item.desc}</div>
@@ -322,6 +427,7 @@ function AboutUs() {
 
 function ContactUs() {
     const [ref, inView] = useInView();
+    const isMobile = useMobile();  // ADDED
     const [form, setForm] = useState({ name: "", email: "", message: "" });
     const [sent, setSent] = useState(false);
     const [sending, setSending] = useState(false);
@@ -333,12 +439,13 @@ function ContactUs() {
     };
 
     return (
-        <section id="contact" ref={ref} style={{ padding: "80px 48px", background: "#040814", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+        <section id="contact" ref={ref} style={{ padding: isMobile ? "60px 20px" : "80px 48px", background: "#040814", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
             <div style={{ maxWidth: "960px", margin: "0 auto" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "80px", alignItems: "start" }}>
+                {/* CHANGED: 1fr on mobile, 2 cols on desktop */}
+                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? "40px" : "80px", alignItems: "start" }}>
                     <div style={{ opacity: inView ? 1 : 0, transform: inView ? "translateY(0)" : "translateY(28px)", transition: "all 0.7s ease" }}>
                         <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "3px", color: "#00D4FF", marginBottom: "12px", textTransform: "uppercase" }}>Contact us</div>
-                        <h2 style={{ fontSize: "34px", fontWeight: "800", color: "#fff", fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: "-0.5px", lineHeight: "1.3", marginBottom: "20px" }}>
+                        <h2 style={{ fontSize: isMobile ? "26px" : "34px", fontWeight: "800", color: "#fff", fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: "-0.5px", lineHeight: "1.3", marginBottom: "20px" }}>
                             Got questions?<br /><span style={{ color: "rgba(255,255,255,0.35)" }}>We are here to help.</span>
                         </h2>
                         <p style={{ fontSize: "15px", color: "rgba(255,255,255,0.45)", lineHeight: "1.8", marginBottom: "40px" }}>
@@ -394,30 +501,39 @@ function ContactUs() {
 
 function CTA({ onCTA }) {
     const [ref, inView] = useInView();
+    const isMobile = useMobile();  // ADDED
     return (
-        <section ref={ref} style={{ padding: "80px 48px", background: "radial-gradient(ellipse 80% 80% at 50% 50%, rgba(0,150,220,0.12) 0%, transparent 70%), #040814", textAlign: "center", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+        <section ref={ref} style={{ padding: isMobile ? "60px 20px" : "80px 48px", background: "radial-gradient(ellipse 80% 80% at 50% 50%, rgba(0,150,220,0.12) 0%, transparent 70%), #040814", textAlign: "center", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
             <div style={{ opacity: inView ? 1 : 0, transform: inView ? "translateY(0)" : "translateY(28px)", transition: "all 0.7s ease" }}>
-                <h2 style={{ fontSize: "38px", fontWeight: "800", color: "#fff", fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: "-0.5px", marginBottom: "16px", lineHeight: "1.3" }}>
+                <h2 style={{ fontSize: isMobile ? "28px" : "38px", fontWeight: "800", color: "#fff", fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: "-0.5px", marginBottom: "16px", lineHeight: "1.3" }}>
                     Ready to trade<br />
                     <span style={{ background: "linear-gradient(135deg, #00D4FF, #0077AA)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>with discipline?</span>
                 </h2>
                 <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.4)", marginBottom: "40px" }}>Join hundreds of traders protecting their accounts with RiskGuard.</p>
-                <button onClick={onCTA} style={{ background: "linear-gradient(135deg, #00D4FF, #0077AA)", color: "white", border: "none", padding: "17px 44px", borderRadius: "12px", fontSize: "16px", fontWeight: "600", cursor: "pointer" }}>Start protecting my account →</button>
+                <button onClick={onCTA} style={{ background: "linear-gradient(135deg, #00D4FF, #0077AA)", color: "white", border: "none", padding: isMobile ? "14px 28px" : "17px 44px", borderRadius: "12px", fontSize: "16px", fontWeight: "600", cursor: "pointer" }}>Start protecting my account →</button>
             </div>
         </section>
     );
 }
 
 function Footer() {
+    const isMobile = useMobile();  // ADDED
     return (
-        <footer style={{ padding: "32px 48px", background: "#040814", borderTop: "1px solid rgba(255,255,255,0.04)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <footer style={{
+            padding: isMobile ? "28px 20px" : "32px 48px",
+            background: "#040814", borderTop: "1px solid rgba(255,255,255,0.04)",
+            display: "flex",
+            flexDirection: isMobile ? "column" : "row",  // CHANGED
+            justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "center",
+            gap: isMobile ? "20px" : "0",
+        }}>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <div style={{ width: "22px", height: "22px", background: "linear-gradient(135deg, #00D4FF, #0099CC)", borderRadius: "5px", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M7 1L13 4V10L7 13L1 10V4L7 1Z" stroke="white" strokeWidth="1.5" fill="none" /><circle cx="7" cy="7" r="2" fill="white" /></svg>
                 </div>
                 <span style={{ fontSize: "14px", fontWeight: "700", color: "rgba(255,255,255,0.5)" }}>RiskGuard</span>
             </div>
-            <div style={{ display: "flex", gap: "32px" }}>
+            <div style={{ display: "flex", gap: "24px", flexWrap: "wrap" }}>
                 {["Features", "Pricing", "About", "Contact"].map(l => (
                     <span key={l} onClick={() => document.getElementById(l.toLowerCase())?.scrollIntoView({ behavior: "smooth" })} style={{ fontSize: "12px", color: "rgba(255,255,255,0.25)", cursor: "pointer" }}
                         onMouseEnter={e => e.target.style.color = "rgba(255,255,255,0.6)"}
