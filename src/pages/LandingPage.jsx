@@ -41,6 +41,84 @@ const PLANS = [
     { name: "Advanced", price: "₹1999", period: "/ 6 months", desc: "Maximum savings for serious long-term traders.", duration: "6 months", popular: false },
 ];
 
+const TESTIMONIALS = [
+    { name: "Rohit M.", location: "Mumbai", avatar: "RM", color: "#00D4FF", text: "I used to blow my weekly gains in one revenge trade. RiskGuard just stops me cold. First profitable month in 8 months." },
+    { name: "Arjun S.", location: "Pune", avatar: "AS", color: "#a3e635", text: "The consecutive loss limit is a game changer. After 2 losses it locks me out. I've stopped the emotional spiral completely." },
+    { name: "Priya K.", location: "Bangalore", avatar: "PK", color: "#f59e0b", text: "I was overtrading 15+ times a day. Now I'm capped at 5 and my win rate went from 32% to 61% in 3 weeks." },
+    { name: "Vikram D.", location: "Delhi", avatar: "VD", color: "#f43f5e", text: "Lost ₹2L in one bad week before RiskGuard. Now my daily loss limit kicks in and I walk away. Already recovered ₹80k." },
+    { name: "Sneha R.", location: "Chennai", avatar: "SR", color: "#a78bfa", text: "The midnight reset is brilliant. Every day starts fresh. I stopped carrying yesterday's losses into new trades." },
+    { name: "Karan P.", location: "Hyderabad", avatar: "KP", color: "#00D4FF", text: "My prop firm challenge was failing every month. Set up RiskGuard, passed in week 3. The discipline is automatic now." },
+    { name: "Meera T.", location: "Ahmedabad", avatar: "MT", color: "#a3e635", text: "I'm a part-time trader. RiskGuard runs while I'm at work and I never come back to a blown account anymore." },
+    { name: "Suresh B.", location: "Kolkata", avatar: "SB", color: "#f59e0b", text: "Tried every journal and rule app. Nothing worked because I could always override them. This one I can't. That's the difference." },
+];
+
+function TestimonialCard({ t }) {
+    return (
+        <div style={{
+            width: "300px", flexShrink: 0,
+            background: "rgba(255,255,255,0.03)",
+            border: "1px solid rgba(255,255,255,0.07)",
+            borderRadius: "16px", padding: "24px",
+        }}>
+            <div style={{ display: "flex", gap: "3px", marginBottom: "14px" }}>
+                {[...Array(5)].map((_, i) => (
+                    <span key={i} style={{ color: "#f59e0b", fontSize: "13px" }}>★</span>
+                ))}
+            </div>
+            <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.7)", lineHeight: "1.75", marginBottom: "20px", fontStyle: "italic" }}>
+                "{t.text}"
+            </p>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <div style={{
+                    width: "36px", height: "36px", borderRadius: "50%",
+                    background: `${t.color}22`, border: `1.5px solid ${t.color}44`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: "11px", fontWeight: "700", color: t.color, flexShrink: 0,
+                }}>{t.avatar}</div>
+                <div>
+                    <div style={{ fontSize: "13px", fontWeight: "700", color: "#fff" }}>{t.name}</div>
+                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.35)" }}>{t.location} · MT5 Trader</div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function Testimonials() {
+    return (
+        <section style={{ padding: "60px 0", background: "#040814", overflow: "hidden", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+            <style>{`
+                @keyframes marquee {
+                    0%   { transform: translateX(0); }
+                    100% { transform: translateX(-50%); }
+                }
+                .marquee-track {
+                    display: flex; gap: 16px;
+                    width: max-content;
+                    animation: marquee 35s linear infinite;
+                }
+                .marquee-track:hover { animation-play-state: paused; }
+            `}</style>
+            <div style={{ textAlign: "center", marginBottom: "36px", padding: "0 20px" }}>
+                <div style={{ fontSize: "11px", fontWeight: "700", letterSpacing: "3px", color: "#00D4FF", marginBottom: "10px", textTransform: "uppercase" }}>What traders say</div>
+                <h2 style={{ fontSize: "28px", fontWeight: "800", color: "#fff", fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: "-0.5px" }}>
+                    Real traders. Real results.
+                </h2>
+            </div>
+            <div style={{ position: "relative" }}>
+                <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: "80px", background: "linear-gradient(to right, #040814, transparent)", zIndex: 2, pointerEvents: "none" }} />
+                <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: "80px", background: "linear-gradient(to left, #040814, transparent)", zIndex: 2, pointerEvents: "none" }} />
+                <div style={{ overflow: "hidden", padding: "8px 0" }}>
+                    <div className="marquee-track">
+                        {TESTIMONIALS.map((t, i) => <TestimonialCard key={`a-${i}`} t={t} />)}
+                        {TESTIMONIALS.map((t, i) => <TestimonialCard key={`b-${i}`} t={t} />)}
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+}
+
 function useInView(threshold = 0.15) {
     const ref = useRef(null);
     const [inView, setInView] = useState(false);
@@ -569,6 +647,7 @@ export default function LandingPage({ onGetStarted, onTryFree }) {
             `}</style>
             <Navbar onCTA={handleCTA} />
             <Hero onCTA={handleCTA} onTryFree={handleTryFree} />
+            <Testimonials />
             <Problems />
             <Features />
             <HowItWorks />

@@ -36,4 +36,11 @@ export const checkTrialEligibility = (account) =>
 export const activateTrial = (email, account) =>
   api.post('/api/trial/activate', { email, account });
 
+export const sendOtp = (email) =>
+  api.post('/api/auth/send-otp', { email });
+ 
+// POST /api/auth/verify-otp
+export const verifyOtp = (email, otp) =>
+  api.post('/api/auth/verify-otp', { email, otp });
+
 export default api;
