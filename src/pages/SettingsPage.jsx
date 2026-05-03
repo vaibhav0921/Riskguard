@@ -9,20 +9,20 @@ const DEFAULTS = { maxDailyLoss: 3.0, maxTrades: 5, maxLossStreak: 2 };
 export default function SettingsPage() {
   const { showToast } = useApp();
   const user = useSelector(s => s.auth.user);
-  const [rules,   setRules]   = useState(DEFAULTS);
+  const [rules, setRules] = useState(DEFAULTS);
   const [loading, setLoading] = useState(true);
-  const [saving,  setSaving]  = useState(false);
+  const [saving, setSaving] = useState(false);
   const [changed, setChanged] = useState(false);
-  const [error,   setError]   = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const load = async () => {
       try {
         const res = await fetchRules(user.email, user.account);
         setRules({
-          maxDailyLoss:  res.data.maxDailyLoss  ?? DEFAULTS.maxDailyLoss,
-          maxTrades:     res.data.maxTrades      ?? DEFAULTS.maxTrades,
-          maxLossStreak: res.data.maxLossStreak  ?? DEFAULTS.maxLossStreak,
+          maxDailyLoss: res.data.maxDailyLoss ?? DEFAULTS.maxDailyLoss,
+          maxTrades: res.data.maxTrades ?? DEFAULTS.maxTrades,
+          maxLossStreak: res.data.maxLossStreak ?? DEFAULTS.maxLossStreak,
         });
       } catch (err) {
         if (err.code !== 'ERR_NETWORK') setError('Could not load your current rules.');
@@ -155,7 +155,7 @@ export default function SettingsPage() {
       </div>
 
       <p style={{ textAlign: 'center', fontSize: 11, color: 'var(--dash-muted)', marginTop: 20, lineHeight: 1.7 }}>
-        Changes are pushed to your MT5 EA automatically.<br/>
+        Changes are pushed to your MT5 EA automatically.<br />
         Trading will stop immediately if any rule is triggered.
       </p>
     </div>

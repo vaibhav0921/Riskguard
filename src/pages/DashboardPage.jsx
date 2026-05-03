@@ -430,7 +430,7 @@ function MainContent({ eaData, rules, user, subscription, lastSync }) {
   const pad = isMobile ? '16px 16px 60px' : '32px 32px 60px';
 
   return (
-    <div style={{ flex: 1, padding: pad, overflowY: 'auto', background: 'var(--dash-bg)', minHeight: '100vh', transition: 'background 0.25s ease' }}>
+    <div style={{ flex: 1, padding: pad, background: 'var(--dash-bg)', transition: 'background 0.25s ease' }}>
       <DashboardHeader user={user} lastSync={lastSync} blocked={isBlocked} />
       {isBlocked && <BlockedBanner reason={eaData?.disabledReason} />}
 
@@ -506,14 +506,14 @@ export default function DashboardPage({ onGoGuide, onSubscriptionExpired, active
   const subscription = useSelector(s => s.auth.subscription);
   const isBlocked = eaData && !eaData.tradingAllowed;
 
- useEffect(() => {
+  useEffect(() => {
     document.body.style.overflowX = 'hidden';
     document.body.style.overflowY = 'auto';          // ← add this
     document.documentElement.style.overflowX = 'hidden';
     document.documentElement.style.overflowY = 'auto'; // ← add this
     document.body.style.background = '';
     document.documentElement.style.background = '';
-}, []);
+  }, []);
 
   if (loading) return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: 14, background: 'var(--dash-bg)' }}>
@@ -540,7 +540,7 @@ export default function DashboardPage({ onGoGuide, onSubscriptionExpired, active
   const content = renderTabContent();
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--dash-bg)', transition: 'background 0.25s ease' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--dash-bg)', transition: 'background 0.25s ease', alignItems: 'flex-start' }}>
       {/* Sidebar — hidden on mobile unless open */}
       <Sidebar
         activeTab={activeTab}
@@ -554,7 +554,7 @@ export default function DashboardPage({ onGoGuide, onSubscriptionExpired, active
         onClose={() => setSidebarOpen(false)}
       />
 
-      <div style={{ flex: 1, overflow: 'hidden' }}>
+      <div style={{ flex: 1, minWidth: 0 }}>
         {/* Mobile top bar */}
         {isMobile && <MobileTopBar onMenuOpen={() => setSidebarOpen(true)} user={user} blocked={!!isBlocked} />}
 
