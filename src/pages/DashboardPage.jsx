@@ -506,12 +506,14 @@ export default function DashboardPage({ onGoGuide, onSubscriptionExpired, active
   const subscription = useSelector(s => s.auth.subscription);
   const isBlocked = eaData && !eaData.tradingAllowed;
 
-  useEffect(() => {
+ useEffect(() => {
     document.body.style.overflowX = 'hidden';
+    document.body.style.overflowY = 'auto';          // ← add this
     document.documentElement.style.overflowX = 'hidden';
+    document.documentElement.style.overflowY = 'auto'; // ← add this
     document.body.style.background = '';
     document.documentElement.style.background = '';
-  }, []);
+}, []);
 
   if (loading) return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: 14, background: 'var(--dash-bg)' }}>
