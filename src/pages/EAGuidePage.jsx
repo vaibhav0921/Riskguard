@@ -116,7 +116,7 @@ export default function EAGuidePage() {
   };
 
   return (
-    <div style={{ maxWidth: 620, margin: '0 auto', padding: '24px 16px 80px' }}>
+    <div style={{ maxWidth: '100%', padding: '32px 40px 80px' }}>
 
       {/* Header */}
       <div className="anim-fade-up d0" style={{ marginBottom: 28 }}>
