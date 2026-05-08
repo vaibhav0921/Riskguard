@@ -76,7 +76,7 @@ function AppRouter({ theme, toggleTheme }) {
           />
         );
 
-      // All dashboard tabs go through DashboardPage — sidebar handles routing
+      // Dashboard manages its own scroll isolation internally
       case 'app':
         return (
           <DashboardPage
@@ -102,11 +102,42 @@ function AppRouter({ theme, toggleTheme }) {
     }
   };
 
+  const isDashboard = route === 'app';
+  const isLanding = route === 'landing';
+
   return (
     <>
-      <div className="ambient" aria-hidden="true" />
-      <div className="noise" aria-hidden="true" />
-      {renderPage()}
+      {/* Decorative layers — skip on landing page which has its own background system */}
+      {!isLanding && <div className="ambient" aria-hidden="true" />}
+      {!isLanding && <div className="noise" aria-hidden="true" />}
+
+      {isDashboard ? (
+        /*
+          Dashboard uses height:100vh + overflow:hidden on its own root div.
+          Render it unwrapped — adding another container breaks it.
+        */
+        renderPage()
+      ) : (
+        /*
+          FIX: All non-dashboard pages (landing, login, plans, payment, success)
+          sit inside a proper scroll container.
+          - minHeight:100vh  → always fills the screen
+          - overflowY:auto   → content taller than viewport scrolls downward
+          - overflowX:hidden → never creates a horizontal scrollbar
+          Without this, pages had no scroll parent so content that exceeded
+          viewport width pushed the layout sideways instead of scrolling down.
+        */
+        <div style={{
+          minHeight: '100vh',
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          position: 'relative',
+          zIndex: 2,
+        }}>
+          {renderPage()}
+        </div>
+      )}
+
       <Toast />
     </>
   );
