@@ -8,7 +8,6 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-
 // GET /api/validate?email=&account=
 export const validateUser = (email, account) =>
   api.get('/api/validate', { params: { email, account } });
@@ -26,21 +25,30 @@ export const fetchStatus = (email, account) =>
   api.get('/api/status', { params: { email, account } });
 
 // POST /api/register  ← called after payment to create user in DB
-export const registerUser = (email, accountNumber, plan, paymentRef) =>
-  api.post('/api/register', { email, accountNumber, plan, paymentRef });
+export const registerUser = (email, accountNumber, plan, paymentRef, referralCode) =>
+  api.post('/api/register', { email, accountNumber, plan, paymentRef, referralCode });
 
-export const checkTrialEligibility = (account) =>
-  api.get('/api/trial/eligibility', { params: { account } });
- 
-// POST /api/trial/activate
-export const activateTrial = (email, account) =>
-  api.post('/api/trial/activate', { email, account });
+// ── OTP endpoints ────────────────────────────────────────────────
 
+// POST /api/otp/send   { email }
 export const sendOtp = (email) =>
-  api.post('/api/auth/send-otp', { email });
- 
-// POST /api/auth/verify-otp
+  api.post('/api/otp/send', { email });
+
+// POST /api/otp/verify { email, otp }
 export const verifyOtp = (email, otp) =>
-  api.post('/api/auth/verify-otp', { email, otp });
+  api.post('/api/otp/verify', { email, otp });
+
+// POST /api/otp/resend { email }
+export const resendOtp = (email) =>
+  api.post('/api/otp/resend', { email });
+
+export const checkTrialEligibility = (email, account) =>
+  api.get('/api/trial/eligibility', { params: { email, account } });
+
+// POST /api/trial/activate  { email, accountNumber }
+// Activates a free trial for the user
+// api.js — fix the activate payload key
+export const activateTrial = (email, accountNumber) =>
+  api.post('/api/trial/activate', { email, account: accountNumber }); // ← was: accountNumber
 
 export default api;

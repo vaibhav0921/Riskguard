@@ -239,18 +239,19 @@ function Hero({ onCTA, onTryFree }) {
     const [mounted, setMounted] = useState(false);
     const isMobile = useMobile();  // ADDED
     useEffect(() => { setTimeout(() => setMounted(true), 100); }, []);
+    const decorativeLayer = { pointerEvents: "none", zIndex: 0 };
     return (
         <section style={{
             minHeight: "100vh",
             background: "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0,180,255,0.12) 0%, transparent 60%), #040814",
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
             padding: isMobile ? "90px 20px 60px" : "100px 48px 60px",  // CHANGED
-            position: "relative", overflow: "hidden",
+            position: "relative", overflow: "hidden", isolation: "isolate",
         }}>
-            <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(0,180,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,180,255,0.04) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
-            <div style={{ position: "absolute", top: "20%", left: "10%", width: "300px", height: "300px", background: "radial-gradient(circle, rgba(0,180,255,0.06) 0%, transparent 70%)", borderRadius: "50%" }} />
-            <div style={{ position: "absolute", bottom: "20%", right: "10%", width: "250px", height: "250px", background: "radial-gradient(circle, rgba(0,120,200,0.06) 0%, transparent 70%)", borderRadius: "50%" }} />
-            <div style={{ position: "relative", textAlign: "center", maxWidth: "820px", width: "100%" }}>  {/* ADDED width:100% */}
+            <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(0,180,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,180,255,0.04) 1px, transparent 1px)", backgroundSize: "60px 60px", ...decorativeLayer }} />
+            <div style={{ position: "absolute", top: "20%", left: "10%", width: "300px", height: "300px", background: "radial-gradient(circle, rgba(0,180,255,0.06) 0%, transparent 70%)", borderRadius: "50%", ...decorativeLayer }} />
+            <div style={{ position: "absolute", bottom: "20%", right: "10%", width: "250px", height: "250px", background: "radial-gradient(circle, rgba(0,120,200,0.06) 0%, transparent 70%)", borderRadius: "50%", ...decorativeLayer }} />
+            <div style={{ position: "relative", zIndex: 1, textAlign: "center", maxWidth: "820px", width: "100%" }}>  {/* ADDED width:100% */}
 
                 {/* LIVE badge */}
                 <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(0,180,255,0.08)", border: "1px solid rgba(0,180,255,0.2)", borderRadius: "20px", padding: "6px 16px", marginBottom: "28px", opacity: mounted ? 1 : 0, transform: mounted ? "translateY(0)" : "translateY(16px)", transition: "all 0.6s ease" }}>
@@ -628,13 +629,36 @@ export default function LandingPage({ onGetStarted, onTryFree }) {
     const handleCTA = () => { if (onGetStarted) onGetStarted(); };
     const handleTryFree = () => { if (onTryFree) onTryFree(); };
     useEffect(() => {
+        const html = document.documentElement;
+        const body = document.body;
+        const previous = {
+            htmlBackground: html.style.background,
+            bodyBackground: body.style.background,
+            htmlOverscroll: html.style.overscrollBehavior,
+            bodyOverscroll: body.style.overscrollBehavior,
+            htmlOverflowY: html.style.overflowY,
+            bodyOverflowY: body.style.overflowY,
+        };
+
         document.documentElement.style.background = "#040814";
         document.body.style.background = "#040814";
-        document.documentElement.style.overscrollBehavior = "none";
-        document.body.style.overscrollBehavior = "none";
+
+        html.style.overflowY = "auto";
+        body.style.overflowY = "auto";
+        html.style.overscrollBehavior = "auto";
+        body.style.overscrollBehavior = "auto";
+
+        return () => {
+            html.style.background = previous.htmlBackground;
+            body.style.background = previous.bodyBackground;
+            html.style.overscrollBehavior = previous.htmlOverscroll;
+            body.style.overscrollBehavior = previous.bodyOverscroll;
+            html.style.overflowY = previous.htmlOverflowY;
+            body.style.overflowY = previous.bodyOverflowY;
+        };
     }, []);
     return (
-        <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: "#040814", minHeight: "100vh" }}>
+        <div className="page-wrap" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: "#040814", minHeight: "100vh" }}>
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
                 * { box-sizing: border-box; margin: 0; padding: 0; }

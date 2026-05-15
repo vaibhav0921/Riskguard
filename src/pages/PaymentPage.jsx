@@ -82,12 +82,18 @@ export default function PaymentPage({ onBack, onSuccess }) {
           // If we skip this, user lands on dashboard with no DB record
           // and sees "Waiting for EA connection" with a 404 from /api/status.
           try {
-            await registerUser(
-              user.email,
-              user.account,
-              plan.name.toUpperCase(),
-              expiryISO
-            );
+            const referralCode = localStorage.getItem('rg_ref') || '';
+
+              await registerUser(
+                    user.email,
+                    user.account,
+                    plan.name.toUpperCase(),
+                     expiryISO,
+                    referralCode
+                   );
+
+                   // Clear referral code after use
+                 localStorage.removeItem('rg_ref');
           } catch (err) {
             // Backend registration failed — payment was taken but account
             // not created. Show error and stay on PaymentPage so user can
