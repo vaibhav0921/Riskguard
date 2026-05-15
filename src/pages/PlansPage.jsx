@@ -1,3 +1,4 @@
+// src/pages/PlansPage.jsx
 import React, { useState, useEffect } from 'react';
 import { PLANS } from '../context/AppContext';
 import { useApp } from '../context/AppContext';
@@ -30,11 +31,12 @@ function PlanCard({ plan, selected, onSelect }) {
           <span className="badge badge-gold">Best Deal</span>
         </div>
       )}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{
             width: 48, height: 48, borderRadius: 14, fontSize: 22,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
             background: selected
               ? `${plan.color.replace('var(--', 'rgba(').replace(')', ',0.15)')}`
               : 'rgba(255,255,255,0.06)',
@@ -55,8 +57,10 @@ function PlanCard({ plan, selected, onSelect }) {
           <div style={{ fontSize: 11, color: 'var(--muted)' }}>one-time</div>
         </div>
       </div>
+
       <div style={{ height: 1, background: selected ? `${plan.color}22` : 'var(--border)', marginBottom: 14 }} />
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 12px' }}>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '6px 12px' }}>
         {plan.features.map((f, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--muted)' }}>
             <span style={{ color: selected ? plan.color : 'var(--lime)', flexShrink: 0 }}><CheckIcon /></span>
@@ -64,6 +68,7 @@ function PlanCard({ plan, selected, onSelect }) {
           </div>
         ))}
       </div>
+
       {selected && (
         <div style={{ position: 'absolute', bottom: 16, right: 16, width: 24, height: 24, borderRadius: '50%', background: plan.color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0d0f14' }}>
           <CheckIcon />
@@ -76,16 +81,14 @@ function PlanCard({ plan, selected, onSelect }) {
 function TrialCard({ onActivate, loading, ineligible }) {
   return (
     <div style={{
-      borderRadius: 18,
-      padding: '24px 24px 20px',
+      borderRadius: 18, padding: '24px 24px 20px',
       background: ineligible
         ? 'rgba(255,255,255,0.02)'
         : 'linear-gradient(135deg, rgba(163,230,53,0.08), rgba(163,230,53,0.03))',
       border: ineligible
         ? '1px solid rgba(255,255,255,0.08)'
         : '1.5px solid rgba(163,230,53,0.3)',
-      position: 'relative',
-      opacity: ineligible ? 0.5 : 1,
+      position: 'relative', opacity: ineligible ? 0.5 : 1,
     }}>
       {!ineligible && (
         <div style={{
@@ -96,9 +99,9 @@ function TrialCard({ onActivate, loading, ineligible }) {
         }}>FREE TRIAL</div>
       )}
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, flexWrap: 'wrap', gap: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ width: 48, height: 48, borderRadius: 14, fontSize: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(163,230,53,0.12)' }}>
+          <div style={{ width: 48, height: 48, borderRadius: 14, fontSize: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(163,230,53,0.12)', flexShrink: 0 }}>
             🎁
           </div>
           <div>
@@ -118,7 +121,7 @@ function TrialCard({ onActivate, loading, ineligible }) {
 
       <div style={{ height: 1, background: ineligible ? 'var(--border)' : 'rgba(163,230,53,0.15)', marginBottom: 14 }} />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 12px', marginBottom: 18 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '6px 12px', marginBottom: 18 }}>
         {['All 3 risk rules', 'Dashboard access', 'EA monitoring', 'Real-time sync', 'Daily auto-reset', '7-day access'].map((f, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--muted)' }}>
             <span style={{ color: ineligible ? 'var(--muted)' : 'var(--lime)', flexShrink: 0 }}><CheckIcon /></span>
@@ -156,21 +159,29 @@ export default function PlansPage({ onContinue, onTrialSuccess }) {
   const dispatch = useDispatch();
 
   const [selected, setSelected] = useState(null);
-  const [trialEligible, setTrialEligible] = useState(null); // null = loading
+  const [trialEligible, setTrialEligible] = useState(null);
   const [trialLoading, setTrialLoading] = useState(false);
   const [trialError, setTrialError] = useState('');
 
   useEffect(() => {
     localStorage.removeItem('rg_session');
-    // Check trial eligibility for this MT5 account
-    if (user?.account) {
-      checkTrialEligibility(user.account)
-        .then(res => setTrialEligible(res.data.eligible))
-        .catch(() => setTrialEligible(false));
-    } else {
-      setTrialEligible(false);
-    }
-  }, [user]);
+
+    // ✅ Wait until account is actually in Redux before checking eligibility.
+    // If account is missing, don't default to ineligible — just wait for the
+    // next render when Redux has flushed the value from LoginPage's dispatch.
+    if (!user?.account || user.account.trim() === '') return;
+
+    checkTrialEligibility(user.email, user.account)
+      .then(res => {
+        console.log('Trial check response:', res.data, 'for account:', user.account);
+        setTrialEligible(res.data.eligible);
+      })
+      .catch(err => {
+        console.log('Trial check error:', err.response?.status, err.response?.data);
+        setTrialEligible(false);
+      });
+
+  }, [user?.account]); // ✅ only re-run when account changes, not whole user object
 
   const handleSelect = (planId) => {
     setSelected(planId);
@@ -181,9 +192,7 @@ export default function PlansPage({ onContinue, onTrialSuccess }) {
     setTrialError('');
     setTrialLoading(true);
     try {
-      const res = await activateTrial(user.email, user.account);
-      const data = res.data;
-      // Dispatch subscription info to Redux
+      await activateTrial(user.email, user.account);
       dispatch(loginAction({ email: user.email, account: user.account }));
       localStorage.setItem('rg_session', 'active');
       if (onTrialSuccess) onTrialSuccess();
@@ -196,13 +205,13 @@ export default function PlansPage({ onContinue, onTrialSuccess }) {
   };
 
   return (
-    <div className="page-wrap" style={{ padding: '40px 16px 60px' }}>
+    <div className="page-wrap" style={{ padding: 'clamp(24px, 5vw, 40px) clamp(12px, 4vw, 16px) 60px' }}>
       <div className="max-w-2xl">
 
         {/* Header */}
         <div className="anim-fade-up d0" style={{ textAlign: 'center', marginBottom: 36 }}>
           <span className="badge badge-lime" style={{ marginBottom: 12 }}>Choose Your Plan</span>
-          <h2 style={{ fontSize: 28, fontWeight: 800, color: 'var(--text)', marginBottom: 8, lineHeight: 1.2 }}>
+          <h2 style={{ fontSize: 'clamp(22px, 5vw, 28px)', fontWeight: 800, color: 'var(--text)', marginBottom: 8, lineHeight: 1.2 }}>
             Start protecting your capital
           </h2>
           <p style={{ fontSize: 14, color: 'var(--muted)' }}>
@@ -210,19 +219,24 @@ export default function PlansPage({ onContinue, onTrialSuccess }) {
           </p>
         </div>
 
-        {/* Trial card — shown at top if eligible or already used */}
-        {trialEligible !== null && (
-          <div className="anim-fade-up d1" style={{ marginBottom: 20 }}>
+        {/* Trial card — show spinner while eligibility is loading */}
+        <div className="anim-fade-up d1" style={{ marginBottom: 20 }}>
+          {trialEligible === null ? (
+            // ✅ Show a neutral loading state instead of wrongly showing "ineligible"
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '32px 0' }}>
+              <Spinner />
+            </div>
+          ) : (
             <TrialCard
               onActivate={handleTrialActivate}
               loading={trialLoading}
               ineligible={!trialEligible}
             />
-            {trialError && (
-              <div className="error-box" style={{ marginTop: 10 }}>{trialError}</div>
-            )}
-          </div>
-        )}
+          )}
+          {trialError && (
+            <div className="error-box" style={{ marginTop: 10 }}>{trialError}</div>
+          )}
+        </div>
 
         {/* Divider */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>

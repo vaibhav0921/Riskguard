@@ -24,6 +24,20 @@ function AppRouter({ theme, toggleTheme }) {
 
   const goTo = (r) => setRoute(r);
 
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  const ref = params.get('ref');
+  if (ref) {
+    localStorage.setItem('rg_ref', ref);
+    // Track click with backend
+    fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/api/affiliate/track-click`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ referralCode: ref }),
+    }).catch(() => {});
+  }
+}, []);
+
   useEffect(() => {
     setLogoutCallback(() => {
       dispatch(logoutAction());
