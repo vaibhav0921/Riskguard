@@ -9,7 +9,7 @@ import EAGuidePage from './EAGuidePage';
 import ContactPage from './ContactPage';
 import TermsPage from './TermsPage';
 import AffiliatePage from './AffiliatePage';
-
+import TradeHistorySection from '../components/TradeHistorySection';
 // ─── Helpers ──────────────────────────────────────────────────────
 const fmt = v =>
   new Intl.NumberFormat('en-IN', {
@@ -119,8 +119,13 @@ function Sidebar({ activeTab, setActiveTab, user, subscription, onLogout, theme,
   const navItems = [
     { id: 'home', label: 'Dashboard', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg> },
     { id: 'rules', label: 'My Rules', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3" /><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" /></svg> },
+    {
+      id: 'trades', label: 'Trade History', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+      </svg>
+    },
     { id: 'guide', label: 'EA Setup', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12.55a11 11 0 0 1 14.08 0" /><path d="M1.42 9a16 16 0 0 1 21.16 0" /><path d="M8.53 16.11a6 6 0 0 1 6.95 0" /><circle cx="12" cy="20" r="1" /></svg> },
-    { id: 'affiliate', label: 'Affiliate', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
+    { id: 'affiliate', label: 'Affiliate', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg> },
   ];
   const supportItems = [
     { id: 'contact', label: 'Help & Contact', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg> },
@@ -471,6 +476,10 @@ function MainContent({ eaData, rules, user, subscription, lastSync }) {
         </div>
         <EAConnection user={user} subscription={subscription} eaData={eaData} lastSync={lastSync} />
       </div>
+      {/* ── Trade History & Discipline Tracker ── */}
+      <div style={{ marginTop: isMobile ? 12 : 20 }}>
+        <TradeHistorySection />
+      </div>
     </div>
   );
 }
@@ -553,6 +562,15 @@ export default function DashboardPage({ onGoGuide, onSubscriptionExpired, active
   const renderTabContent = () => {
     if (activeTab === 'rules') return <div style={{ flex: 1, background: 'var(--dash-bg)', minWidth: 0, transition: 'background 0.25s ease' }}><SettingsPage /></div>;
     if (activeTab === 'guide') return <div style={{ flex: 1, background: 'var(--dash-bg)', minWidth: 0, transition: 'background 0.25s ease' }}><EAGuidePage /></div>;
+    if (activeTab === 'trades') return (
+      <div style={{
+        flex: 1, background: 'var(--dash-bg)', minWidth: 0,
+        transition: 'background 0.25s ease',
+        padding: 'clamp(16px, 4vw, 32px)'
+      }}>
+        <TradeHistorySection />
+      </div>
+    );
     if (activeTab === 'contact') return <div style={{ flex: 1, background: 'var(--dash-bg)', minWidth: 0, transition: 'background 0.25s ease' }}><ContactPage /></div>;
     if (activeTab === 'terms') return <div style={{ flex: 1, background: 'var(--dash-bg)', minWidth: 0, transition: 'background 0.25s ease' }}><TermsPage /></div>;
     if (activeTab === 'affiliate') return <div style={{ flex: 1, background: 'var(--dash-bg)', minWidth: 0, transition: 'background 0.25s ease' }}><AffiliatePage /></div>;
